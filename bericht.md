@@ -1,6 +1,7 @@
 ---
 Author: Marcel Stanislav Müller
 Title: Praxissemester Bericht September 2015 bis März 2016
+Language: German
 StudentID: 245618
 ---
 
@@ -61,4 +62,26 @@ Anfang an dabei und haben auch Aktiv die Weiterentwicklung gesteuert.
 
 ![Benutzer der Studicloud, nach Standort](users_studicloud.png)
 
+Die Cloud ist auf 5 Servern aufgebaut, 2 Management Knoten und 3 Compute
+Knoten.
 
+- Auf den Management Knoten liegen jeweils das Dashboard, Keystone sowie Neutron
+- Auf den Compute Knoten gibt es auf jedem Nova sowie Virtuelle Router (durch
+  Neutron gesteuert)
+
+
+RzCloud
+-------
+
+Die RzCloud ist eine Test-Installation und wurde von uns auch so benutzt. Dort
+konnten wir ungestört Infrastruktur testen, sowie verschiedene Wartungsabläufe
+*üben* bevor wir diese dann Produktiv angesetzt haben. Sie hat einen ähnlichen
+Aufbau wie die Studicloud.
+
+BwCloud
+-------
+
+Die BwCloud ist komplexer aufgebaut wie die vorher gennanten da diese verteilt
+ist. Sie besteht aus mehreren Zonen, verteilt durch Baden-Wuerttemberg.
+
+Es gibt Standorte in: Freiburg, Ulm, Mannheim sowie in Karlsruhe.
