@@ -1,7 +1,7 @@
 ---
 author: Marcel Stanislav Müller (245618)
 title: Praxissemester Bericht September 2015 bis März 2016
-language: German
+lang: de
 ---
 
 \newpage
@@ -87,4 +87,93 @@ BwCloud
 Die BwCloud ist komplexer aufgebaut wie die vorher gennanten da diese verteilt
 ist. Sie besteht aus mehreren Zonen, verteilt durch Baden-Wuerttemberg.
 
-Es gibt Standorte in: Freiburg, Ulm, Mannheim sowie in Karlsruhe.
+Es gibt Standorte in Freiburg, Ulm, Mannheim sowie in Karlsruhe. Ich habe mich
+während meines Praxissemesters nur mit dem Standort Freiburg auseinandergesetzt.
+
+Der interne Aufbau ist der selbe wie in der Studicloud[\ref{studicloud}].
+
+
+High Performance Computing
+==========================
+
+Freiburg besitzt auch einen HPC Cluster der viel in der Wissenschaft benutzt
+wird; zum Beispiel für Simulationen.
+
+Wir hatten nicht sehr viel mit diesem Cluster zu tun, durften uns aber ansehen
+wie ein solcher Cluster aufgebaut ist, was sehr interessant und lehrreich war.
+
+
+Erster Monat
+============
+
+Am Anfang wurden uns zwei Aufgaben gegeben:
+
+- Monitoring für die Studicloud
+- Auto Update von VPS Bildern
+
+
+Monitoring
+----------
+
+Nach evaluation verschiedener Monitoring Software hatten wir uns für Zabbix
+entschieden. Es ist darauf ausgelegt von mehreren Servern gleichzeitig Daten zu
+sammeln, diese zu aggregieren und auszuwerten.
+
+
+### Zabbix
+
+Zabbix ist ein Monitoring Tool entwickelt für grosse Installationen an
+verschiedenen, zu überwachenden Systemen. Eine typische Installation hat einen
+Server der periodisch die einezelnen zu überwachenden Systeme abfragt und diese
+Daten in eine Datenbank einpflegt. Es ist dann möglich gewisse Werte zu
+überwachen und 'Triggers' auszulösen, bei z.B. zu wenig Speicher auf der
+Festplatte. Die Erweiterbarkeit von Zabbix kam uns sehr gelegen und wir hatten
+im Laufe des Semesters viele Skripte geschrieben die es einem ermöglichten eine
+Openstack Installation gut im Auge zu behalten.
+
+Monitoring (cont.)
+------------------
+
+Zabbix wurde dann im laufe der nächsten Tage auf den verschiedenen Maschinen
+installiert und konfiguriert. Dies passierte auf der Studicloud, RzCloud sowie
+auf dem HPC. Durch die E-Mails die durch 'Triggers' ausgelöst wurden hatten wir
+immer die Situation schnell wieder under Kontrolle.
+
+
+Putty und Windows
+-----------------
+
+Da viele Nutzer der Studicloud Windows benutzen war leider ein einbinden einer
+spezifischen Anleitung für SSH nicht ausgeschlossen. Dies passiert unter Windows
+oft unter Putty. Da dies aber keine OpenSSH Schluessel annimmt wurde uns die
+Aufgabe gegeben ez zu ermöglichen, da Putty ein Tool bereit stellt mit dem
+OpenSSH Schlüssel zu den Putty eigenen umwandeln kann.
+
+Die Nutzung ist aber sehr archaisch und daher einem *gewöhnlichem* Windows User
+nicht zumutbar, wir hatten uns daraufhin auf ein Windows Skript vereinbart. Da
+wir sonst nicht Windows benutzen war dies etwas komplett neues für uns. Am
+anfang hatten wir es mit einfachen Batch Dateien zusammen gebaut. Da Windows
+sich aber in den letzten Versionen weigert Batch Dateien die aus dem Internet
+kommen auszuführen konnten wir diese Methode nicht benutzen.
+
+Die nächste Version wurde dann in PowerShell geschrieben, was einen erheblichen
+Sprung nach vorne in der Technologie ist, aber leider immer noch vieles zu
+Wünschen übrig lässt. Da PowerShell gewisse ähnlichkeiten zu C# hat fiel uns es
+einfacher hier ein schlankes und funktionierendes Skript zu schreiben. Dies
+wurde dann auch Produktiv eingesetzt.
+
+Zweiter Monat
+=============
+
+Im Zweiten Monat hatten wir uns eingearbeitet und uns wurde mehr Freiheit
+gegeben. Unsere Aufgaben wurden weniger Precise hatten dadurch aber mehr Umfang.
+Es war eine Erfrischende Art zu arbeiten, wenn auch unbekannt.
+
+
+Ceph
+----
+
+Wir haben uns dann ausgesucht Ceph näher kennen zu lernen damit wir es korrekt
+überwachen können.
+
+
