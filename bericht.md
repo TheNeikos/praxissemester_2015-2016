@@ -1,10 +1,13 @@
 ---
-Author: Marcel Stanislav Müller
-Title: Praxissemester Bericht September 2015 bis März 2016
-Language: German
-StudentID: 245618
+author: Marcel Stanislav Müller (245618)
+title: Praxissemester Bericht September 2015 bis März 2016
+language: German
 ---
 
+\newpage
+
+Überblick
+=========
 
 Für mein Praxissemester war ich im Lehrpool/Rechenzentrum der Universität
 Freiburg tätig. Während meiner Zeit dort war ich zuständig für die Wartung und
