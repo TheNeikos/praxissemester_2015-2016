@@ -176,4 +176,58 @@ Ceph
 Wir haben uns dann ausgesucht Ceph näher kennen zu lernen damit wir es korrekt
 überwachen können.
 
+### Ceph Überblick
+
+Ceph ist ein programm für ein verteiltes Dateisystem, genannt CephFS. Es ist ein
+redudanter Objektspeicher, dies ermöglicht es einem Blockgeräte in Linux auf
+verschiedene Systeme und Platten zu verteilen. Redundanz ist auch eingebaut und
+Daten überleben somit auch Ausfälle. Über die Monate in Freiburg haben wir keine
+Datenverluste festgestellt obwohl es auch zu Maschinen abstrürzen kam.
+
+### Ceph im Einsatz
+
+Da Ceph redundant, verteilt und Blockgeräte zur Verfügung stellt eignet es sich
+gut im Einsatz von Clouds zum Speicher der einzelnen Abbilder sowie Daten der
+Maschinen. Wir haben Ceph in der Studicloud und in der RzCloud eingesetzt.
+
+### Ceph Überwachung
+
+Ceph besitzt mehrer Daemons verschiedener Klassen.
+
+- Monitors (ceph-mon), diese kümmern sich darum dass Kluster zu beobachten und
+  zu reagieren
+- Metadaten (ceph-mds), diese kümmern sich, wie der Name sagt, um die Metadaten,
+  also zum Beispiel Verzeichniss Strukturen sowie Inodes.
+- OSDs (ceph-osd), kurz für *Object Storage Device* ist der Daemon der sich um
+  die einzelnen Platten kümmert und diese verwaltet. Er ist der _wichtigste_ da
+  er die wirklichen Daten abwickelt.
+
+Es gibt auch noch einen REST Daemon, da wir diesen aber nicht genutzt haben
+werde ich ihn auslassen. Laut Dokumentation wird dieser benutzt um mit
+aussenstehend Services zu kommunizieren wie z.B.: AWS, etc...
+
+
+Über unsere Zeit dort hat Ceph uns einige Einsichten gegeben wie Systeme
+skalieren, bzw. wann sie *nicht* skalieren.
+So ist zum Beispiel sehr anfällig was Netz Infrakstruktur angeht. Wenn das
+Kommunikationsnetz von Ceph unterbrochen wird dann kommt es oft dazu das ein OSD
+abstürzt.
+
+Dies wird mit einem einfachen Neustart des Daemons wiederhergestellt.
+Im späteren Verlauf, in Verbindung mit Zabbix[\ref{zabbix}], haben wir diesen
+Prozess automatisiert.
+
+![Ceph Operationen der Letzten Stunde](ceph_ops.png)
+
+Zabbix[\ref{zabbix}] ist einfach erweiterbar, da Ceph alle daten auch über die
+Commandozeile ausgibt; war es sehr einfach Skripts zu schreiben die Zabbix
+nutzen konnte und somit waren dann auch diese Daten eingebunden.
+
+High Performance Cluster
+========================
+
+Wir haben während unserer Zeit in Freiburg auch mit dem HPC der Universität
+gearbeitet. Dort waren wir auch für das Monitoring zuständig. Durch das
+installieren der Zabbix agenten haben wir dann auch gelernt wie zum Beispiel
+Multi-Stage booting funktioniert.
 
