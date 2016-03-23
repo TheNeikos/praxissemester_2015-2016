@@ -231,3 +231,201 @@ gearbeitet. Dort waren wir auch für das Monitoring zuständig. Durch das
 installieren der Zabbix agenten haben wir dann auch gelernt wie zum Beispiel
 Multi-Stage booting funktioniert.
 
+Crashes
+-------
+
+In der Zeit während wir an Zabbix gearbeitet haben ist uns aufgefallen dass im
+HPC hin und wieder Maschinen einfach ausgehen. Durch das Monitoring haben wir
+dann rausgefunden dass die Maschinen kurz vor dem Crash immer einen vollen
+Arbeitsspeicher hatten. Unsere Vermutung lag dann mit der dort verwendeten
+Technologie: ZRam.
+
+### ZRam
+
+ZRam ist eine Technologie die im Kernel seit der Version 3.11 existiert. Sie
+komprimiert zu schreibende Swap Pages in den RAM. Die Idee ist dass man eine
+Reduzierung von bis zu 2:1 des RAMs bekommt.
+
+Das Problem war bei uns wohl eine Fehleinstellung, der Swap hat wohl versucht
+den reservierten Speicher zu swappen, worauf dann eine Kernel Panic ausgelöst
+wurde. Dies hat dann die Maschinen immer sofort ausgemacht.
+
+Da wir nicht die Ursache gefunden hatten haben wir ZRam erst einmal ausgemacht
+und waren nun auf der Suche nach einer Alternative.
+
+Crashes (cont.)
+---------------
+
+Da die Ursache behoben war, hatten wir nun das Problem dass ZRam eigentlich
+lösen sollte: Zu wenig RAM auf den individuellen Maschinen.
+
+Hier bekam ich dann die Aufgabe nach alternativen zu suchen.
+
+### NBD (Network Block Device)
+
+Linux unterstützt ein Recht einfaches System um  Blockdevices auch über das
+Netz anzusprechen. Dies macht normalerweise der NBD Server.
+
+Da wir eine Maschine zur Verfügung hatten die einen sehr grosse Menge an RAM
+besitzt war die Idee Dateien im RAM anzulegen und diese als Block Devices über
+NBD bereit zustellen.
+
+Dazu kommt noch dass NBD dies per default unterstützt, durch eine option werde
+angelegte Dateien sofort wieder gelöscht. Da Linux aber diese nur de-allociert
+sobald alle File Deskriptoren dazu auch geschlossen wurden bleibt die Datei im
+RAM vorhanden aber sobald ein Client sich dann disconnected verschwindet diese
+und der RAM ist wieder freigegeben.
+
+Durch ein paar Tests wollten wir dann rausfinden wie schnell denn sowas ist.
+Zu diesem Zeitpunkt lernten wir dann Infiniband kennen.
+
+### Infiniband
+
+Infiniband ist eine Technologie für Hochgeschwindigkeitsübertragungen die oft in
+Hight Performance Umgebungen eingesetzt wird. Diese wird auch hier benutzt und
+mit NBD ist die Geschwindigkeit erheblich besser als über eine normale Netzwerk
+Verbindung.
+
+Die Geschwindigkeiten liegen etwa bei 230MB/s was ziemlich gut ist. Aber dies
+war nur eine Maschine und skaliert wahrscheinlich nicht über 100~ Knoten.
+
+Dazu kommt noch dass dies einigermassen Flexibel sein soll, wenn eine Maschine
+mehrmals neustartet sollten nicht alte Dateien zu lange bleiben.
+
+### RDMA
+
+Da NBD sich nicht besser als eine Swap Datei auf der lokalen Platte bewiesen
+hatte wurde nach einer Alternative gesucht. Hier kam dann die Frage, "Was wenn
+wir den ganzen Network Stack umgehen könnten?"
+
+Dazu brauchen wir RDMA. Kurz für Remote Direct Memory Access. Es erlaubt einem
+die CPU zu umgehen und direkt die Memory Unit anzusprechen.
+
+\newpage
+
+![Übersicht RDMA (ZCopy\textcopyright)\label{rdma-overview}](sample-rdma-protocol-stack.jpg)
+
+Zu Zeitpunkt meines Praxissemesters gab es keine fertige Möglichkeit dies zu
+benutzen. Es gab aber Pakete die sehr Nahe lagen:
+
+#### RSocket
+
+RSocket ist ein Tool das mit `LD_PRELOAD` zusammenarbeitet um `socket()` calls
+abzufangen und diese über ein RDMA TCP/IP Stack zu routen. Leider war die
+Dokumentation zu Obskur, um es einzusetzen. Das letzte Release war auch von vor
+etwa drei Jahren und es gab keinen Support mehr.
+
+Die Idee war zwar vielversprechend, hat sich aber wohl leider nicht
+durchgesetzt.
+
+
+#### NBD with RDMA
+
+NBD hatte einen experimentellen Flag mit dem man es auch über RDMA ansteuern
+konnte. Leider wurde dies nie zu Ende gepatched worden und funktionierte nicht.
+Ein durchsuchen der Source fand auch viele Fehler was darauf zu schliessen
+lässt das dies nicht in absehbarer Zeit stabilisiert wird.
+
+
+RDMA over Infiniband
+====================
+
+Nachdem verschiedene Anläufe zu nichts geführt haben ist die Idee die uns seit
+mehreren Tagen in den Köpfen lag doch zu der am nähesten umsetzbaren geworden.
+
+Die Idee war dass man einen Mechanismus anbietet der, ähnlich wie NBD, einem
+Server die möglichkeit gibt Teile seines RAMs anderen anzubieten und sozusagen
+deren RAM auslagert, i.e. Remote Swap.
+
+Durch die hohe Schnelligkeit von Infiniband ist dies natürlich eine gute Idee
+auf dem Papier. Uns war von Anfang an bekannt dass die Idee selbst schwierig
+sein wird da nun ein Kernel Module gefragt ist. Ich habe diese Aufgabe alleine
+angenommen und bearbeitet.
+
+## Kernel Module
+
+Der Linux Kernel erlaubt es einem einfach, dynamische Kernel Module zu bauen,
+und zwar seit Version 2.6 (2003).
+
+### Aufbau
+
+Ein Kernel Module ist recht einfach aufgebaut in seinem einfachsten Zustand.
+
+
+```c
+#include <linux/module.h>
+#include <linux/kernel.h>
+
+MODULE_LICENSE("GPL");
+
+int init_module() {
+    printk(KERN_WARN "Hallo ich bin ein Kernel Module!");
+}
+
+void cleanup_module() {
+    printk(KERN_WARN "Tschuess!");
+}
+
+```
+
+Diese kann dann kompiliert werden und mit insmod/rmmod geladen bzw. entfernt
+werden.
+
+Nun war die Aufgabe rauszufinden wie man denn die RDMA Hardware ansprechen
+konnte und diese Korrekt initialisieren kann.
+
+### RDMA Aufbau
+
+Wie in Abbild \ref{rdma-overview} (S. \pageref{rdma-overview}) beschrieben ist
+RDMA zweigeteilt.
+
+#### Command Channel
+
+Der Command Channel in RDMA kümmert sich um die synchonisierung sowie die
+bereitstellung von Daten. Diese Kommunikation ist Asynchron und erfolgt durch
+das verschicken von bestimmten Paketen auf das Zielsystem die von diesem dann
+verarbeitet werden.
+
+#### Data Channel
+
+Die geschwindigkeit von RDMA kommt nicht nur durch die engere Verkabelung
+sondern auch dadurch dass der *Leser* der Daten nich durch den CPU des Targets
+beinschränkt ist da dieser Umgangen wird. Man liest also direkt aus dem RAM des
+anderen Servers. Remote Direct Memory Access.
+
+### Aufbau (cont.)
+
+Nachdem ich mich eingearbeitet hatte in das Module System des Kernels fing ich
+an einen Block Device Treiber zu schreiben. Dieser würde Memory *Pinnen* und
+dadurch aktiv dem Kernel sagen dass er diesen Bereich nicht mehr anfassen soll
+was generell Memory Management angeht.
+
+#### Block Devices unter Linux
+
+Diese Art von Treiber sind unter Linux die am weitesten verbreiteten wenn es
+darum geht von einem Physikalischem System Speicher mit einzubeziehen.
+
+Die Basis Idee ist eine Struktur bereitzustellen auf die der Kernel dann
+Anfragen stellen kann. Diese werden oft in Blöcken bereitgestellt, per default
+in 512 Bytes jeweils.
+
+Diese Queue wird dann in seinem Zeit-Quantum abgearbeitet, diese an den
+angegeben Ort gelagert und dann wiederum an den restlichen Kernel zurück
+gegeben.
+
+Dies funktioniert so:
+
+- Allokieren des Block Devices `register_blkdev(0, "name")`.
+  Dies gibt eine Zahl zurück, die Major des devices.
+- Generieren der 'Disks' durch `alloc_disk(minor)`.
+- Dem Kernel sagen wohin request geschickt werden sollen `disk->queue = blk_init_queue(/**/)`
+- Nach dem man dann den Disk konfiguriert hat kann der nun bereitgestellt werden
+  mit `add_disk`. Dieser ist nun unter /dev/name$minor ansprechbar. Zum Beispiel
+  `/dev/sda`
+
+Ab sofort kann der Kernel requests an den Treiber senden, der diese nun
+abarbeiten muss. Falls man dies nicht tut blockiert das System intern. Da dies
+im Kernel space ist gibt es auch keine möglichkeit solche Fehler zu beheben.
+
+
+
