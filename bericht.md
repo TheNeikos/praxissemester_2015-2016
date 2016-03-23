@@ -2,6 +2,11 @@
 author: Marcel Stanislav Müller (245618)
 title: Praxissemester Bericht September 2015 bis März 2016
 lang: de
+header-includes:
+    - \usepackage{dtklogos}
+    - \usepackage{float}
+    - \usepackage{tikz}
+    - \usetikzlibrary{mindmap, shadows}
 ---
 
 \newpage
@@ -415,17 +420,84 @@ gegeben.
 
 Dies funktioniert so:
 
-- Allokieren des Block Devices `register_blkdev(0, "name")`.
-  Dies gibt eine Zahl zurück, die Major des devices.
+- Allokieren des Block Devices `register_blkdev(0, "name")`.  Dies gibt eine
+  Zahl zurück, die Major des devices.
 - Generieren der 'Disks' durch `alloc_disk(minor)`.
-- Dem Kernel sagen wohin request geschickt werden sollen `disk->queue = blk_init_queue(/**/)`
+- Dem Kernel sagen wohin request geschickt werden sollen `disk->queue =
+  blk_init_queue(/**/)`
 - Nach dem man dann den Disk konfiguriert hat kann der nun bereitgestellt werden
   mit `add_disk`. Dieser ist nun unter /dev/name$minor ansprechbar. Zum Beispiel
   `/dev/sda`
 
 Ab sofort kann der Kernel requests an den Treiber senden, der diese nun
 abarbeiten muss. Falls man dies nicht tut blockiert das System intern. Da dies
-im Kernel space ist gibt es auch keine möglichkeit solche Fehler zu beheben.
+im Kernelspace ist gibt es auch keine Möglichkeit solche Fehler zu beheben.
+
+### Aufbau (cont.)
+
+Die Idee war nun dass diese ganzen Daten durchgeschleust werden. Also dass der
+Kernel die Daten bei dem Treiber abfragt, dieser dann eine RDMA anfrage erstellt
+und diese wiederrum dann abgearbeitet wird, und der Speicher vom anderem System
+in den lokalen Speicher kopiert wird. Das bedeutet dass wenn etwas geswapped
+wird dann ist dieser dann auf dem Fremdem System, über RDMA dann auch schnell.
+
+
+### Erster Ansatz
+
+Ein erster Ansatz war erfolgreich in dem Sinne dass ein einfacher Block Device
+Treiber implementiert wurde. Dieser wurde `rdma_blockdevice` gennant und ist
+auch auf Github verfügbar.
+([https://github.com/theneikos/rdma_blockdevice](https://github.com/theneikos/rdma_blockdevice))
+
+Der nächste Schritt ist dann gewesen RDMA zu implementieren. Hier traten dann
+die ersten Probleme auf. RDMA ist leider eine Kombination aus zwei Sachen: eine
+neue Technologie und von 'Großen Firmen' erarbeitet. Dies bedeutet dass am Ende
+zwar neue Sachen existieren, die Dokumentation aber leider nicht verfügbar ist
+oder diese hinter Paywalls wie zum Beispiel Seminare steht.
+
+Da wir hier aber kein Geld ausgeben wollten für ein Experiment haben wir das
+Projekt an dieser Stelle abgebrochen. Neue Hardware sollte die Performance
+Probleme in absehbarer Zeit selbst lösen.
+
+## Neue Erkentnisse
+
+Ich habe während dieser Zeit einiges gelernt über den internen Kernel Aufbau und
+dessen Technologien. Ich habe auch in C ein paar neue 'Tricks' gelernt die ich
+sicher einsetzen werde. Es hat auch ein Interesse in mir geweckt was
+Hardware-nahe Entwicklung angeht und habe dadurch vor zum Beispiel einen Kernel
+in Rust zu implementieren.
+
+
+\newpage
+
+# BwCloud Weiterentwicklung
+
+Die BwCloud ist eine verteilte Infrastruktur die Studenten, Lehrbeauftragte,
+Wissenschaftler, etc...  in Baden-Württemberg die Möglichkeit geben soll ihre
+eigenen Virtuellen Server zu verwalten.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+      \tikzset{concept/.append style={fill={none}}}
+      \path[mindmap,concept color=black,text=black]
+        node[concept] {BwCloud}
+        [clockwise from=0]
+        child[concept color=green!50!black] {
+          node[concept] {Freiburg}
+        }
+        child[concept color=blue] {
+          node[concept] {Ulm}
+        }
+        child[concept color=red] {
+            node[concept] {Mannheim}
+        }
+        child[concept color=orange] {
+            node[concept] {Karlsruhe}
+        };
+    \end{tikzpicture}
+    \caption{Aufbau der BwCloud} \label{fig:aufbau_bwcloud}
+\end{figure}
 
 
 
