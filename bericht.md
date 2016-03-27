@@ -2,11 +2,13 @@
 author: Marcel Stanislav Müller (245618)
 title: Praxissemester Bericht September 2015 bis März 2016
 lang: de
+bibel-lang: german
 header-includes:
     - \usepackage{dtklogos}
     - \usepackage{float}
     - \usepackage{tikz}
     - \usetikzlibrary{mindmap, shadows}
+    - \usetikzlibrary{shapes,arrows}
 ---
 
 \newpage
@@ -497,6 +499,84 @@ eigenen Virtuellen Server zu verwalten.
         };
     \end{tikzpicture}
     \caption{Aufbau der BwCloud} \label{fig:aufbau_bwcloud}
+\end{figure}
+
+Diese verteilte Struktur bringt eine gewisse Komplexität mit sich was zum
+Beispiel Ressourcen Verwaltung angeht; ein Punkt den wir uns näher angesehen
+haben.
+
+## VM Migration
+
+Da VMs bei verschiedenen Regionen liegen können gibt es den UseCase das ein
+Benutzer seine VM in eine andere Region bewegen möchte. Dies wiederum ist in
+zwei Aufgaben aufgeteilt.
+
+- Die Daten der VM müssen migriert werden
+- Die Quotas des Nutzers müssen angepasst werden
+
+Der erste Punkt wird durch ein einfaches Kopieren gelöst, hier liegt die
+Komplexität darin eine API zu entwickeln. Dies hat Manuel Messner übernommen.
+
+\newpage
+
+Der zweite Punkt, die Migration der Quotas, ist nötig damit ein User eine
+Gewisse Anzahl an Ressource über die ganze Cloud hat. Zum Beispiel:
+
+
+\begin{table}[H]
+    \centering
+    \label{start_ram_usage}
+    \bgroup
+        \def\arraystretch{1.5}%  1 is the default, change whatever you need
+        \begin{tabular}{|l|r|}
+            \hline
+            Karlsruhe & 10GiB Ram \\ \hline
+             Freiburg &  0Gib Ram \\ \hline
+            Mannheim  &  0Gib Ram \\ \hline
+             Ulm      &  0Gib Ram \\ \hline
+        \end{tabular}
+    \egroup
+    \caption{Menge an verfübarem RAM in den jeweiligen Regionen}
+\end{table}
+
+Ein Benutzer möchte nun von Karlsruhe nach Mannheim eine VM migrieren. Damit die
+Betreiber nicht eintreten müssen war eine Benutzerfreundliche Lösung gefragt. Da
+Openstack schon eine visuelle Verwaltung besitzt (das Dashboard) haben wir uns
+entschlossen diese zu erweitern.
+
+
+### Mechanismus
+
+Der Mechanismus ist recht einfach gehalten:
+
+\begin{figure}[H]
+\centering
+\label{flowchar_migration}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20,
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+
+\begin{tikzpicture}[node distance = 2cm, auto]
+    % Place nodes
+    \node [block] (check) {Größe der VM ermitteln};
+    \node [decision, below of=check, node distance=3cm] (ausreichend) {Genug Platz in Ziel Region?};
+    \node [block, below of=ausreichend, node distance=3cm] (migrate) {VM Migrieren};
+    \node [block, right of=ausreichend, right of=check, node distance=3cm] (calculate) {Ausrechnen pro Region};
+    \node [block, below of=calculate, node distance=3cm] (migrate_quotas) {Quotas in die Ziel Region migrieren};
+    % Draw edges
+    \path [line] (check) -- (ausreichend);
+    \path [line] (ausreichend) -- node {Nein} (calculate);
+    \path [line] (ausreichend) -- node {Ja} (migrate);
+    \path [line] (calculate) -- (migrate_quotas);
+    \path [line] (migrate_quotas) -- (migrate);
+\end{tikzpicture}
+
+\caption{Flowchart des Algorithmus}
 \end{figure}
 
 
