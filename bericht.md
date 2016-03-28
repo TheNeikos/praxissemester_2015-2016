@@ -579,5 +579,15 @@ Der Mechanismus ist recht einfach gehalten:
 \caption{Flowchart des Algorithmus}
 \end{figure}
 
+Dies erlaubt den Benutzer flexibel ihre VMs zu verwalten und spart somit auch
+Verwaltungskosten.
+
+Ein nächster Punkt ist das konfigurieren der Netzwerke. Openstack erstellt diese
+nicht automatisch. Sind sind aber dennoch wichtig um eine Verbindung ins
+Internet zu bekommen. Dies wird auch durch das Skript gemacht um den Nutzern die
+Nutzung zu vereinfachen.
+
+All dies wird durch die REST API von Openstack angesprochen und verwaltet.
+
 
 

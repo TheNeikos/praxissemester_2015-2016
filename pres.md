@@ -8,24 +8,26 @@ date: \today
 
 # Freiburg
 ## Rechenzentrum
+### HPC
 
-- Studicloud
-- RzCloud
-- BwCloud
+- ~ 100 Knoten
+- Benutzer in der Physik/Chimie oder auch Biologie sowie Neurologie
 
-## Studicloud
+### Studicloud
 
-Zur Studicloud
+- Zusammenarbeit zwischen Freiburg und Furtwange
+- 5 Server
 
-## RzCloud
+### RzCloud
 
 Zur Rzcloud
 
-## BwCloud
+### BwCloud
 
 Zur BWCloud
 
 # Aufgaben
 ## Monitoring
+### Zabbix
 
 Asdfasdf
