@@ -589,5 +589,24 @@ Nutzung zu vereinfachen.
 
 All dies wird durch die REST API von Openstack angesprochen und verwaltet.
 
+\newpage
+
+# Fazit
+
+Ich habe während meiner Zeit verschiedene Sachen gelernt:
+
+- Pendeln ist sehr mühselig und kann zu Problemen führen:
+    - Schnee in Furtwangen heisst späte Arbeitszeiten
+    - Stau auf der Bundesstrasse
+
+- Python ist keine Sprache für komplexe Umgebungen
+    - Schwierig sich einzuarbeiten
+    - Es ist eine Skriptsprache
+    - Inherent kein Multithreading
+    - ...
+
+Nichtsdestotrotz fand ich mein Praxissemester im Rechenzentrum sehr lehrreich
+und es hat mir auch Spass gemacht.
+
 
 

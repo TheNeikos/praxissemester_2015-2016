@@ -6,7 +6,8 @@
 \defaultfontfeatures{Ligatures=TeX}
 
 \definecolor{FuwaGreen}{RGB}{0, 132, 77}
-\definecolor{FuwaLightgreen}{RGB}{131, 184, 26}
+\definecolor{FuwaLightgreen}{RGB}{0, 132, 77}
+%\definecolor{FuwaLightgreen}{RGB}{131, 184, 26}
 \definecolor{FuwaLightgray}{RGB}{218, 220, 220}
 \definecolor{FuwaAnthrazit}{RGB}{112, 113, 115}
 \definecolor{FuwaBlack}{RGB}{0, 0, 0}
@@ -62,6 +63,17 @@
     \end{tikzpicture}
 }
 
+\setbeamertemplate{subsection page}{%
+    \begin{tikzpicture}
+        \useasboundingbox (1cm, 0.0cm) rectangle (\the\paperwidth, \the\paperheight);
+        \fill[color=FuwaGreen] (0, 3.85cm) rectangle (12.8cm, 4.0cm);
+
+        \node at (10cm, 8cm) {\includegraphics[width=4cm]{hfu.eps}};
+        \node[anchor=south,text width=11.8cm,inner xsep=0.5cm] at (8.4cm,4cm)
+            {\color{FuwaGreen}\Large\textbf{\insertsubsection}};
+    \end{tikzpicture}
+}
+
 
 
 \setbeamertemplate{frametitle}{%
@@ -69,10 +81,10 @@
         % set up the entire slide as the canvas
         \useasboundingbox (1cm, 0) rectangle (11.8cm, 1.25cm);
         \fill[color=FuwaLightgreen] (0cm, 0.1cm) rectangle (12.8cm, 1.5cm);
-        \fill[color=FuwaLightgreen!90!FuwaBlack] (0, 0.1cm) rectangle (6.8cm, 1.5cm);
-        \fill[color=FuwaLightgreen!90!FuwaBlack] (6.8cm, 0.1cm) -- (8.8cm, 1.5cm) -- (6.8cm, 1.5cm);
-        \fill[color=FuwaLightgreen!90!FuwaBlack] (6.7cm, 0.1cm) parabola (8.7cm, 1.5cm);
-        \fill[color=FuwaGreen] (0, 0.05cm) rectangle (12.8cm, 0.1cm);
+        \fill[color=FuwaLightgreen!75!FuwaBlack] (0, 0.1cm) rectangle (6.8cm, 1.5cm);
+        \fill[color=FuwaLightgreen!75!FuwaBlack] (6.8cm, 0.1cm) -- (8.8cm, 1.5cm) -- (6.8cm, 1.5cm);
+        \fill[color=FuwaLightgreen!75!FuwaBlack] (6.7cm, 0.1cm) parabola (8.7cm, 1.5cm);
+        %\fill[color=FuwaGreen] (0, 0.05cm) rectangle (12.8cm, 0.1cm);
         \node[anchor=north,text width=11.8cm,inner xsep=0.5cm,inner ysep=0.25cm] at (6.4cm, 1.1cm)
             {\color{FuwaWhite}\Large\textbf{\insertframetitle}};
     \end{tikzpicture}

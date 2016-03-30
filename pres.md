@@ -8,26 +8,39 @@ date: \today
 
 # Freiburg
 ## Rechenzentrum
-### HPC
-
-- ~ 100 Knoten
-- Benutzer in der Physik/Chimie oder auch Biologie sowie Neurologie
-
-### Studicloud
-
-- Zusammenarbeit zwischen Freiburg und Furtwange
-- 5 Server
-
-### RzCloud
-
-Zur Rzcloud
-
 ### BwCloud
 
-Zur BWCloud
+- Verteilte Infrastruktur
+- Verschiedene Arten von Nutzern
+- Openstack
+
+\begin{center}
+    \includegraphics[height=4cm]{openstack}
+\end{center}
+
+### RzCloud/Studicloud
+
+- Openstack
+- 'Test Installation' von Openstack
+
+\begin{center}
+    \includegraphics[height=4cm]{openstack}
+\end{center}
 
 # Aufgaben
 ## Monitoring
 ### Zabbix
 
-Asdfasdf
+- Monitoring
+- Einfach zu erweitern
+
+\begin{center}
+    \includegraphics[height=4cm]{zabbix}
+\end{center}
+
+### Zabbix (cont.)
+
+
+\begin{center}
+    \includegraphics[height=4cm]{users_studicloud}
+\end{center}
